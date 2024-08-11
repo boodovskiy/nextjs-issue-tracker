@@ -26,8 +26,8 @@ const NavBar = () => {
                     href={link.href} 
                     className={
                         classnames({
-                            'underline': link.href === currentPath,
-                            'text-zinc-800 hover:text-zinc-500 hover:underline transition-colors': true
+                            'underline text-white': link.href === currentPath,
+                            'text-zinc-500 hover:text-white hover:underline transition-colors': true
                         })
                 }>
                     {link.label}
