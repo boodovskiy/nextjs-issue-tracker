@@ -3,7 +3,7 @@ import { z } from "zod";
 import prisma from "@/prisma/client";
 
 const createIssueSchema = z.object({
-    title: z.string().min(3).max(255),
+    title: z.string().min(3, "Title is required.").max(255),
     description: z.string().min(5)
 });
 
