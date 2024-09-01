@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/app/components';
 
 const AssigneeSelect = () => {
-    const {data: users, error, isLoading } = useQuery<User[]>({
+    const { data: users, error, isLoading } = useQuery<User[]>({
         queryKey: ['users'],
         queryFn: () => axios.get('/api/users').then(res => res.data),
         staleTime: 60*1000, // 60s
