@@ -35,6 +35,17 @@ export default function RootLayout({
                   {children}
                 </Container>
               </main>
+              <footer className="mt-10 text-center">
+                Built by{' '}
+                <a
+                  href="https://specialcase.net/"
+                  className="text-violet-500 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  SpecialCase
+                </a>
+             </footer>
             </Theme>
           </AuthProvider>
         </QueryClientProvider>
