@@ -5,75 +5,72 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
-    request: NextRequest,
-    { params } : { params: { id: string } }) {
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
+  if (request.headers.get("x-middleware-subrequest")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-    // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
-    if (request.headers.get('x-middleware-subrequest')) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({}, { status: 401 });
 
-    const session = await getServerSession(authOptions);
-    if (!session) 
-       return NextResponse.json({}, { status: 401 });
+  const body = await request.json();
+  const validation = patchIssueSchema.safeParse(body);
 
-    const body = await request.json();
-    const validation = patchIssueSchema.safeParse(body);
+  if (!validation.success)
+    return NextResponse.json(validation.error.format(), { status: 400 });
 
-    if (!validation.success) 
-        return NextResponse.json(validation.error.format(), { status: 400 });
-
-    const { assignedToUserId, title, description } = body;
-    if (assignedToUserId) {
-        const user = await prisma.user.findUnique({
-            where: { id: assignedToUserId },
-        });
-        if (!user)
-            NextResponse.json({ error: 'Invalid User'}, { status: 400 });
-    }
-
-    const issue = await prisma.issue.findUnique({
-        where: {id: parseInt(params.id)}
-    })
-
-    if (!issue)
-        return NextResponse.json({ error: 'Invalid Issue'}, { status: 404 });
-
-    const updatedIssue = await prisma.issue.update({
-        where: { id: issue.id },
-        data: {
-            title,
-            description,
-            assignedToUserId
-        }
+  const { assignedToUserId, title, description } = body;
+  if (assignedToUserId) {
+    const user = await prisma.user.findUnique({
+      where: { id: assignedToUserId },
     });
+    if (!user) NextResponse.json({ error: "Invalid User" }, { status: 400 });
+  }
 
-    return NextResponse.json(updatedIssue);
+  const issue = await prisma.issue.findUnique({
+    where: { id: parseInt(params.id) },
+  });
+
+  if (!issue)
+    return NextResponse.json({ error: "Invalid Issue" }, { status: 404 });
+
+  const updatedIssue = await prisma.issue.update({
+    where: { id: issue.id },
+    data: {
+      title,
+      description,
+      assignedToUserId,
+    },
+  });
+
+  return NextResponse.json(updatedIssue);
 }
 
 export async function DELETE(
-    request: NextRequest,
-    { params } : { params: { id: string } }) {
-    
-    // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
-    if (request.headers.get('x-middleware-subrequest')) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-        
-    const session = await getServerSession(authOptions);
-    if (!session) 
-        return NextResponse.json({}, { status: 401 });
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
+  if (request.headers.get("x-middleware-subrequest")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-    const issue = await prisma.issue.findUnique({
-        where: { id: parseInt(params.id) }
-    });
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({}, { status: 401 });
 
-    if (!issue) 
-        return NextResponse.json({ error: 'Invalid issue'}, { status: 404});
+  const issue = await prisma.issue.findUnique({
+    where: { id: parseInt(params.id) },
+  });
 
-    await prisma.issue.delete({
-        where: { id: issue.id}
-    });
+  if (!issue)
+    return NextResponse.json({ error: "Invalid issue" }, { status: 404 });
 
-    return NextResponse.json({});
+  await prisma.issue.delete({
+    where: { id: issue.id },
+  });
+
+  return NextResponse.json({});
 }
