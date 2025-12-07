@@ -8,6 +8,11 @@ export async function PATCH(
     request: NextRequest,
     { params } : { params: { id: string } }) {
 
+    // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
+    if (request.headers.get('x-middleware-subrequest')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session) 
        return NextResponse.json({}, { status: 401 });
@@ -49,6 +54,11 @@ export async function PATCH(
 export async function DELETE(
     request: NextRequest,
     { params } : { params: { id: string } }) {
+    
+    // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
+    if (request.headers.get('x-middleware-subrequest')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
         
     const session = await getServerSession(authOptions);
     if (!session) 

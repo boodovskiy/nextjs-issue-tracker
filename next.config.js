@@ -5,7 +5,13 @@ const nextConfig = {
             {
                 source: '/:path*',
                 headers: [
-                    { key: 'referrer-policy', value: 'no-referrer'}
+                    // Block the x-middleware-subrequest header to prevent CVE-2025-29937 bypass
+                    { key: 'x-middleware-subrequest', value: '' },
+                    // Additional security headers
+                    { key: 'referrer-policy', value: 'no-referrer'},
+                    { key: 'X-Frame-Options', value: 'DENY' },
+                    { key: 'X-Content-Type-Options', value: 'nosniff' },
+                    { key: 'X-XSS-Protection', value: '1; mode=block' }
                 ]
             }
         ]

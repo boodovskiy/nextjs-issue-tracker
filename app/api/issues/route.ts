@@ -5,6 +5,11 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/app/auth/authOptions";
 
 export async function POST(request: NextRequest) {
+    // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
+    if (request.headers.get('x-middleware-subrequest')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session) 
         return NextResponse.json({}, { status: 401 });
