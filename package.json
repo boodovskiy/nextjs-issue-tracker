@@ -46,5 +46,8 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.14",
     "daisyui": "^4.12.10"
+  },
+  "overrides": {
+    "glob": "10.5.0"
   }
 }
