@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
   if (request.headers.get("x-middleware-subrequest")) {
@@ -22,6 +22,7 @@ export async function PATCH(
   if (!validation.success)
     return NextResponse.json(validation.error.format(), { status: 400 });
 
+  const { id } = await params;
   const { assignedToUserId, title, description } = body;
   if (assignedToUserId) {
     const user = await prisma.user.findUnique({
@@ -31,7 +32,7 @@ export async function PATCH(
   }
 
   const issue = await prisma.issue.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(id) },
   });
 
   if (!issue)
@@ -51,7 +52,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // CVE-2025-29937 mitigation: Block requests with x-middleware-subrequest header
   if (request.headers.get("x-middleware-subrequest")) {
@@ -61,8 +62,9 @@ export async function DELETE(
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({}, { status: 401 });
 
+  const { id } = await params;
   const issue = await prisma.issue.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(id) },
   });
 
   if (!issue)
